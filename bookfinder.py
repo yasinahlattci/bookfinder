@@ -8,18 +8,17 @@ import time
 import os
 import pandas as pd
 
-def urun_ara(URL, price):
-    class defs():
-        def amazon_tarayici(self,driver, URL, dataset, data_counter, main_url):
+def searchProduct(URL, price):
+    class functions():
+        def searchAmazon(self,driver, URL, dataset, data_counter, main_url):
             driver.get(URL)
-            soup_object = BeautifulSoup(driver.page_source, 'html.parser')
-            elemanlar = soup_object.find_all("div", {"data-component-type": "s-search-result"})
-            for i in elemanlar:
-
-                adres = i.find("a", "a-link-normal a-text-normal").get("href")
-                adres = main_url + adres
-                driver.get(adres)
-                """ASIN BULMA"""
+            soupObject = BeautifulSoup(driver.page_source, 'html.parser')
+            elements = soupObject.find_all("div", {"data-component-type": "s-search-result"})
+            for i in elements:
+                address = i.find("a", "a-link-normal a-text-normal").get("href")
+                address = main_url + address
+                driver.get(address)
+                "FIND ASINs"
                 try:
                     asin_parca = driver.find_element_by_xpath('//*[@id="detailBullets_feature_div"]/ul').text.split(
                         "\n")
@@ -66,9 +65,9 @@ def urun_ara(URL, price):
                     pass
             """YENİ SAYFAYA GEÇMEK İÇİN BURASI"""
             try:
-                go_next_page=soup_object.find('li',attrs={'class':'a-last'}).a.get('href')
+                go_next_page=soupObject.find('li',attrs={'class':'a-last'}).a.get('href')
                 go_next_page=main_url+go_next_page
-                self.amazon_tarayici(driver, go_next_page, dataset, data_counter, main_url)
+                self.searchAmazon(driver, go_next_page, dataset, data_counter, main_url)
             except:
                 pass
 
@@ -113,32 +112,32 @@ def urun_ara(URL, price):
             driver.quit()
             return dataset
 
-        def sonuc_yaz(self, dataset, price):
-            sıra_counter=1
+        def writeOutput(self, dataset, price):
+            counter=1
             path = r'C:\Users\daimo\OneDrive\Masaüstü'
             wb = ex.Workbook('{}\sonucla1r.xlsx'.format(path))
-            sf1 = wb.add_worksheet('Sayfa1')
-            sf1.write(0, 0, "ASIN")
-            sf1.write(0, 1, "Cover")
-            sf1.write(0, 2, "AmzMin")
-            sf1.write(0, 3, "AmzMax")
-            sf1.write(0, 4, "AmzOrt")
-            sf1.write(0, 5, "EbayMin")
-            sf1.write(0, 6, "EbayMax")
-            sf1.write(0, 7, "EbayOrt")
-            sf1.write(0, 8, "NetKar")
+            page1 = wb.add_worksheet('Page1')
+            page1.write(0, 0, "ASIN")
+            page1.write(0, 1, "Cover")
+            page1.write(0, 2, "AmzMin")
+            page1.write(0, 3, "AmzMax")
+            page1.write(0, 4, "AmzOrt")
+            page1.write(0, 5, "EbayMin")
+            page1.write(0, 6, "EbayMax")
+            page1.write(0, 7, "EbayOrt")
+            page1.write(0, 8, "NetKar")
             for i in dataset.values:
                 if(i[8]>price):
-                    sf1.write(sıra_counter, 0, i[0])
-                    sf1.write(sıra_counter, 1, i[1])
-                    sf1.write(sıra_counter, 2, i[2])
-                    sf1.write(sıra_counter, 3, i[3])
-                    sf1.write(sıra_counter, 4, i[4])
-                    sf1.write(sıra_counter, 5, i[5])
-                    sf1.write(sıra_counter, 6, i[6])
-                    sf1.write(sıra_counter, 7, i[7])
-                    sf1.write(sıra_counter, 8, i[8])
-                    sıra_counter+=1
+                    page1.write(counter, 0, i[0])
+                    page1.write(counter, 1, i[1])
+                    page1.write(counter, 2, i[2])
+                    page1.write(counter, 3, i[3])
+                    page1.write(counter, 4, i[4])
+                    page1.write(counter, 5, i[5])
+                    page1.write(counter, 6, i[6])
+                    page1.write(counter, 7, i[7])
+                    page1.write(counter, 8, i[8])
+                    counter+=1
             wb.close()
 
         def kar_hesap(self, dataset):
@@ -150,7 +149,7 @@ def urun_ara(URL, price):
             dataset['Kar']=kar_list
             return dataset
 
-    islem = defs()
+    islem = functions()
     main_url = 'https://www.amazon.com'
     sonuclar = {'ASIN': [],
                 'Cover': [],
@@ -166,12 +165,12 @@ def urun_ara(URL, price):
     data_counter = 0
     driver=webdriver.Chrome()
     driver.get(main_url)
-    driver,dataset=islem.amazon_tarayici(driver, URL, dataset, data_counter, main_url)
+    driver,dataset=islem.searchAmazon(driver, URL, dataset, data_counter, main_url)
     dataset=islem.ebay_tarayici(driver, dataset)
     dataset=islem.kar_hesap(dataset)
-    islem.sonuc_yaz(dataset, price)
+    islem.writeOutput(dataset, price)
 ###########################################
 """URL = 'https://www.amazon.com/s?me=A3TDR7PXU58ECM&marketplaceID=ATVPDKIKX0DER'
 price=float(1)
-urun_ara(URL, price)"""
+searchProduct(URL, price)"""
 
