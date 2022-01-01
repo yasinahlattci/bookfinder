@@ -20,35 +20,35 @@ def searchProduct(URL, price):
                 driver.get(address)
                 "FIND ASINs"
                 try:
-                    asin_parca = driver.find_element_by_xpath('//*[@id="detailBullets_feature_div"]/ul').text.split(
+                    dividedAsin = driver.find_element_by_xpath('//*[@id="detailBullets_feature_div"]/ul').text.split(
                         "\n")
-                    for i in asin_parca:
+                    for i in dividedAsin:
                         if i[0:7] == 'ISBN-13':
-                            A_SIN = i[10:13]
-                            A_SIN1 = i[14:]
-                            ASIN = A_SIN + A_SIN1
+                            asin1 = i[10:13]
+                            asin2 = i[14:]
+                            ASIN = asin1 + asin2
                 except:
                     pass
-                """ASIN BULMA BİTTİ"""
-                eleman_soup = BeautifulSoup(driver.page_source, 'html.parser')
+                "FIND ASIN's finished"
+                soupElement = BeautifulSoup(driver.page_source, 'html.parser')
                 try:
-                    secili = eleman_soup.find("li", attrs={"class": "swatchElement selected"})
-                    if secili == None:
-                        secili = eleman_soup.find("li", attrs={"class": "swatchElement selected resizedSwatchElement"})
+                    chosenItem = soupElement.find("li", attrs={"class": "swatchElement selected"})
+                    if chosenItem == None:
+                        chosenItem = soupElement.find("li", attrs={"class": "swatchElement selected resizedSwatchElement"})
                 except:
                     pass
                 try:
-                    """KİTAP TÜRÜNÜ BUL"""
-                    fs = secili.find('span', attrs={"class": "a-button-inner"}).a.text
+                    "FIND BOOK TYPE"
+                    fs = chosenItem.find('span', attrs={"class": "a-button-inner"}).a.text
                     fs = fs.split("\n")[1]
-                    new_linki = secili.find('span', 'olp-new olp-link').a.get("href")
+                    new_linki = chosenItem.find('span', 'olp-new olp-link').a.get("href")
                     new_linki = main_url + new_linki
                     driver.get(new_linki)
-                    new_soup = BeautifulSoup(driver.page_source, "html.parser")
-                    new_soup_prices = new_soup.find_all("div", attrs={"class": "a-row a-spacing-mini",
+                    newSoupItem = BeautifulSoup(driver.page_source, "html.parser")
+                    newSoupItemPrices = newSoupItem.find_all("div", attrs={"class": "a-row a-spacing-mini",
                                                                       "class": "a-row a-spacing-mini olpOffer"})
-                    sonuclar = []
-                    for t in new_soup_prices:
+                    results = []
+                    for t in newSoupItemPrices:
                         fiyat = float(
                             t.find('span', 'a-size-large a-color-price olpOfferPrice a-text-bold').text.strip()[1:])
                         try:
@@ -56,9 +56,9 @@ def searchProduct(URL, price):
                             fiyat += ship
                         except:
                             pass
-                        sonuclar.append(fiyat)
-                    dataset.loc[data_counter] = {'ASIN': ASIN, 'Cover': fs, 'AmzMin': min(sonuclar),
-                                                 'AmzMax': max(sonuclar), 'AmzOrt': sum(sonuclar) / len(sonuclar),
+                        results.append(fiyat)
+                    dataset.loc[data_counter] = {'ASIN': ASIN, 'Cover': fs, 'AmzMin': min(results),
+                                                 'AmzMax': max(results), 'AmzOrt': sum(results) / len(results),
                                                  'EbayMin': None, 'EbayMax': None, 'EbayOrt': None, 'Kar':None}
                     data_counter += 1
                 except:
@@ -73,7 +73,7 @@ def searchProduct(URL, price):
 
             return driver, dataset
 
-        def ebay_tarayici(self, driver, dataset):
+        def searchEbay(self, driver, dataset):
             minlist = []
             maxlist = []
             ortlist = []
@@ -151,7 +151,7 @@ def searchProduct(URL, price):
 
     islem = functions()
     main_url = 'https://www.amazon.com'
-    sonuclar = {'ASIN': [],
+    results = {'ASIN': [],
                 'Cover': [],
                 'AmzMin': [],
                 'AmzMax': [],
@@ -160,13 +160,13 @@ def searchProduct(URL, price):
                 'EbayMax': [],
                 'EbayOrt': [],
                 'Kar':[]}
-    dataset = pd.DataFrame(sonuclar, columns=['ASIN', 'Cover', 'AmzMin', 'AmzMax',
+    dataset = pd.DataFrame(results, columns=['ASIN', 'Cover', 'AmzMin', 'AmzMax',
                                               'AmzOrt', 'EbayMin', 'EbayMax', 'EbayOrt', 'Kar'])
     data_counter = 0
     driver=webdriver.Chrome()
     driver.get(main_url)
     driver,dataset=islem.searchAmazon(driver, URL, dataset, data_counter, main_url)
-    dataset=islem.ebay_tarayici(driver, dataset)
+    dataset=islem.searchEbay(driver, dataset)
     dataset=islem.kar_hesap(dataset)
     islem.writeOutput(dataset, price)
 ###########################################
