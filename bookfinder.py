@@ -9,7 +9,9 @@ import os
 import pandas as pd
 
 def searchProduct(URL, price):
+
     class functions():
+
         def searchAmazon(self,driver, URL, dataset, dataCounter, mainUrl):
             driver.get(URL)
             soupObject = BeautifulSoup(driver.page_source, 'html.parser')
