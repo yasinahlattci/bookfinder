@@ -115,40 +115,27 @@ def searchProduct(URL, price):
             return dataset
 
         def writeOutput(self, dataset, price):
-            counter=1
+            columnList = ["ASIN", "Cover", "AmzMin", "AmzMax", "AmzOrt", "EbayMin", "EbayMax", "EbayOrt", "Netprofit"]
+            counter = 1
             path = r'C:\Users\daimo\OneDrive\Masaüstü'
             wb = ex.Workbook('{}\sonucla1r.xlsx'.format(path))
             page1 = wb.add_worksheet('Page1')
-            page1.write(0, 0, "ASIN")
-            page1.write(0, 1, "Cover")
-            page1.write(0, 2, "AmzMin")
-            page1.write(0, 3, "AmzMax")
-            page1.write(0, 4, "AmzOrt")
-            page1.write(0, 5, "EbayMin")
-            page1.write(0, 6, "EbayMax")
-            page1.write(0, 7, "EbayOrt")
-            page1.write(0, 8, "Netprofit")
+            for i in range(len(columnList)):
+                page1.write(0, i, columnList[i])
             for i in dataset.values:
                 if(i[8]>price):
-                    page1.write(counter, 0, i[0])
-                    page1.write(counter, 1, i[1])
-                    page1.write(counter, 2, i[2])
-                    page1.write(counter, 3, i[3])
-                    page1.write(counter, 4, i[4])
-                    page1.write(counter, 5, i[5])
-                    page1.write(counter, 6, i[6])
-                    page1.write(counter, 7, i[7])
-                    page1.write(counter, 8, i[8])
-                    counter+=1
+                    for j in range(8):
+                        page1.write(counter, j, i[j])
+                    counter += 1
             wb.close()
 
         def calculateProfit(self, dataset):
             """profit=Amzprice-RefFee-Vcf-Shipping-Alış-DepoKira"""
-            profitList=[]
+            profitList = []
             for i in dataset.values:
-                profit=i[4]-0.15*i[4]-float(1.8)-float(3)-i[5]-float(1)
+                profit = i[4]-0.15*i[4]-float(1.8)-float(3)-i[5]-float(1)
                 profitList.append(profit)
-            dataset['profit']=profitList
+            dataset['profit'] = profitList
             return dataset
 
     process = functions()
