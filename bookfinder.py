@@ -51,21 +51,21 @@ def searchProduct(URL, price):
                                                                       "class": "a-row a-spacing-mini olpOffer"})
                     results = []
                     for t in newSoupItemPrices:
-                        fiyat = float(
+                        price = float(
                             t.find('span', 'a-size-large a-color-price olpOfferPrice a-text-bold').text.strip()[1:])
                         try:
-                            ship = float(t.find('span', attrs={"class": "olpShippingPrice"}).text[1:])
-                            fiyat += ship
+                            shippingPrice = float(t.find('span', attrs={"class": "olpShippingPrice"}).text[1:])
+                            price += shippingPrice
                         except:
                             pass
-                        results.append(fiyat)
+                        results.append(price)
                     dataset.loc[dataCounter] = {'ASIN': ASIN, 'Cover': fs, 'AmzMin': min(results),
                                                  'AmzMax': max(results), 'AmzOrt': sum(results) / len(results),
                                                  'EbayMin': None, 'EbayMax': None, 'EbayOrt': None, 'profit':None}
                     dataCounter += 1
                 except:
                     pass
-            """YENİ SAYFAYA GEÇMEK İÇİN BURASI"""
+            "Go to seller's new page"
             try:
                 goNextPage = soupObject.find('li',attrs={'class':'a-last'}).a.get('href')
                 goNextPage = mainUrl+goNextPage
@@ -90,10 +90,10 @@ def searchProduct(URL, price):
                     try:
                         price = float(newBooks[i].find('span', attrs={'class': 's-item__price'}).text[1:])
                         try:
-                            ship = float(
+                            shippingPrice = float(
                                 newBooks[i].find('span', attrs={'class': 's-item__shipping s-item__logisticsCost'})
                                     .text.split(" ")[0][2:])
-                            price += ship
+                            price += shippingPrice
                         except:
                             pass
                         priceList.append(price)
@@ -143,7 +143,7 @@ def searchProduct(URL, price):
             wb.close()
 
         def calculateProfit(self, dataset):
-            """profit=AmzFiyat-RefFee-Vcf-Shipping-Alış-DepoKira"""
+            """profit=Amzprice-RefFee-Vcf-Shipping-Alış-DepoKira"""
             profitList=[]
             for i in dataset.values:
                 profit=i[4]-0.15*i[4]-float(1.8)-float(3)-i[5]-float(1)
